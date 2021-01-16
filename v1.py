@@ -104,7 +104,34 @@ def main_detection(image):
             print(min_x_roi, max_x_roi, min_y_roi,max_y_roi )
             cropped = image_copy[min_y_roi : max_y_roi , min_x_roi : max_x_roi ]
             cropped = cv2.resize(cropped, ((max_x_roi - min_x_roi)*5,(max_y_roi - min_y_roi)*5))
-            return([image , cropped])
+            cropped_gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
+            thresh = cv2.threshold(cropped_gray, 70, 255, cv2.THRESH_BINARY_INV)[1]
+            
+            height, width = thresh.shape[0], thresh.shape[1]
+            
+            # seperating the image into 2 halves from middle
+            # looking for ratio of white to black pixels
+            # on each side
+            left_thresh = thresh[0:height, 0: width//2]
+            left_thresh_white = height*width - cv2.countNonZero(left_thresh)
+            
+            right_thresh = thresh[0:height, width//2 : width]
+            right_thresh_white = height*width -  cv2.countNonZero(right_thresh)
+           
+            # ratio of white pixel count left vs right
+            ratio_white =  left_thresh_white/right_thresh_white
+            if ratio_white < 0.82:
+                print('right',ratio_white)
+                cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+            elif 0.85 <= ratio_white < 1.2 :
+                
+                print('centre',ratio_white)
+                cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+            else:
+                print('left',ratio_white)
+                cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+           
+            return([image , thresh])
     else:
         return([image])
 
@@ -112,7 +139,14 @@ def main_detection(image):
 
 ########################### test ###########################
 
+
 cap =   cv2.VideoCapture(0)#, cv2.CAP_DSHOW)
+
+fourcc = cv2.VideoWriter_fourcc(*'XVID') 
+success = True
+fps = int(cap.get(cv2.CAP_PROP_FPS))
+out = cv2.VideoWriter('RESULTS.avi', fourcc, 30, (750, 421)) 
+
 while cap.isOpened():
     _, img = cap.read()
 
@@ -120,9 +154,11 @@ while cap.isOpened():
     if len(output) == 2:
         cv2.imshow('main', output[0])
         cv2.imshow('cropped', output[1])
+        
     else:
         cv2.imshow('main', output[0])
- 
+    
+    out.write(output[0])
         
     #cv2.imshow('main',output_main)
     #cv2.imshow('main',output_eye)
@@ -130,5 +166,6 @@ while cap.isOpened():
         break
 
 cap.release()
+out.release()
 cv2.destroyAllWindows() 
 
