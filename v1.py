@@ -123,7 +123,7 @@ def main_detection(image):
             if ratio_white < 0.82:
                 print('right',ratio_white)
                 cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-            elif 0.85 <= ratio_white < 1.2 :
+            elif 0.82 <= ratio_white < 1.2 :
                 
                 print('centre',ratio_white)
                 cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
