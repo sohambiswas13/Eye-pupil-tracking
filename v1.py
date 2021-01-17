@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Sun Jan 17 21:17:56 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Sat Jan 16 11:08:14 2021
 
 @author: Soham
@@ -27,11 +34,18 @@ predictor_landmark = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat
 # looks if the length of the line from these
 # points drops down below certain threshold
 # return blink, else open
-def eye_blink(image,x1,y1,x2,y2,threshold_blink):
-    length = ((x1-x2)**2 + (y1-y2)**2)**0.5
-    if length <= threshold_blink:
-        print(['blink',length])
-
+def euc_dist(v1,v2):
+    return ((v1[0]-v2[0])**2 + (v1[1]-v2[1])**2)**0.5
+    
+    
+def eye_blink(image,p1,p2,p3,p4,p5,p6,threshold_blink):
+    # detect 'eye aspect ratio' EAR
+    # EAR = (euc(p2=37,p6=41) + euc(p3=38,p5=40)) / (2 * euc(p1=36,p4=39))
+    EAR = (euc_dist(p2,p6) + euc_dist(p3,p5)) / (2 * euc_dist(p1,p4))
+    #print(['blink',EAR])
+    if EAR <= threshold_blink:
+        print(['blink',EAR])
+        cv2.putText(image, 'blink', (100,400), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
         #return('blink')
     #else:
        # print('open')
@@ -81,9 +95,10 @@ def main_detection(image):
                                      ( (landmark_40[0]+landmark_41[0])//2 ,landmark_40[1] ), (0, 255, 0), 1 )
             
             # detect blink
-            eye_blink(image = image,x1=(landmark_37[0]+landmark_38[0])//2, y1=landmark_37[1] ,
-                      x2=(landmark_40[0]+landmark_41[0])//2, y2=landmark_40[1], 
-                      threshold_blink = 7 )
+            eye_blink(image = image,p1=landmark_36,p2=landmark_37,
+                      p3=landmark_38, p4=landmark_39,
+                      p5=landmark_40, p6=landmark_41,
+                      threshold_blink = 0.2 )
             
             ########################### Detecting the eye motion ###########################
             # setting the eye region of interest
@@ -158,7 +173,7 @@ while cap.isOpened():
     else:
         cv2.imshow('main', output[0])
     
-    out.write(output[0])
+    #out.write(output[0])
         
     #cv2.imshow('main',output_main)
     #cv2.imshow('main',output_eye)
@@ -166,6 +181,6 @@ while cap.isOpened():
         break
 
 cap.release()
-out.release()
+#out.release()
 cv2.destroyAllWindows() 
 
