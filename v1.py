@@ -1,5 +1,26 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jan 20 11:23:51 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Mon Jan 18 11:36:58 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Jan 17 23:41:17 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Sun Jan 17 21:17:56 2021
 
 @author: Soham
@@ -16,8 +37,8 @@ import cv2
 import dlib
 import face_recognition
 import numpy as np
+import time
 
-    
 # initiating the face recognition library in dlib
 detector_face = dlib.get_frontal_face_detector()
     
@@ -44,12 +65,14 @@ def eye_blink(image,p1,p2,p3,p4,p5,p6,threshold_blink):
     EAR = (euc_dist(p2,p6) + euc_dist(p3,p5)) / (2 * euc_dist(p1,p4))
     #print(['blink',EAR])
     if EAR <= threshold_blink:
-        print(['blink',EAR])
+        #print(['blink',EAR])
         cv2.putText(image, 'blink', (100,400), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+        #print( 1)
+        return(1)
         #return('blink')
-    #else:
+    else:
        # print('open')
-        #return('open')
+        return(0)
 
         
 
@@ -94,11 +117,11 @@ def main_detection(image):
             cv2.line(image, ( (landmark_37[0]+landmark_38[0])//2 ,landmark_37[1] ),
                                      ( (landmark_40[0]+landmark_41[0])//2 ,landmark_40[1] ), (0, 255, 0), 1 )
             
-            # detect blink
-            eye_blink(image = image,p1=landmark_36,p2=landmark_37,
+            # detect blink and return 1
+            blink = eye_blink(image = image,p1=landmark_36,p2=landmark_37,
                       p3=landmark_38, p4=landmark_39,
                       p5=landmark_40, p6=landmark_41,
-                      threshold_blink = 0.2 )
+                      threshold_blink = 0.25 )
             
             ########################### Detecting the eye motion ###########################
             # setting the eye region of interest
@@ -116,7 +139,7 @@ def main_detection(image):
             max_x_roi = np.max(eye_roi[:,0])
             min_y_roi = np.min(eye_roi[:,1])
             max_y_roi = np.max(eye_roi[:,1])
-            print(min_x_roi, max_x_roi, min_y_roi,max_y_roi )
+            #print(min_x_roi, max_x_roi, min_y_roi,max_y_roi )
             cropped = image_copy[min_y_roi : max_y_roi , min_x_roi : max_x_roi ]
             cropped = cv2.resize(cropped, ((max_x_roi - min_x_roi)*5,(max_y_roi - min_y_roi)*5))
             cropped_gray = cv2.cvtColor(cropped, cv2.COLOR_BGR2GRAY)
@@ -128,29 +151,60 @@ def main_detection(image):
             # looking for ratio of white to black pixels
             # on each side
             left_thresh = thresh[0:height, 0: width//2]
-            left_thresh_white = height*width - cv2.countNonZero(left_thresh)
+            left_thresh_black = height*width - cv2.countNonZero(left_thresh)
             
             right_thresh = thresh[0:height, width//2 : width]
-            right_thresh_white = height*width -  cv2.countNonZero(right_thresh)
+            right_thresh_black = height*width -  cv2.countNonZero(right_thresh)
            
             # ratio of white pixel count left vs right
-            ratio_white =  left_thresh_white/right_thresh_white
-            if ratio_white < 0.82:
-                print('right',ratio_white)
-                cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-            elif 0.82 <= ratio_white < 1.2 :
+            ratio_white =  left_thresh_black/right_thresh_black
+            
+            def direction_reg(image, ratio_white):
                 
-                print('centre',ratio_white)
-                cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-            else:
-                print('left',ratio_white)
-                cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-           
-            return([image , thresh])
+                if ratio_white < 1:
+                    #print('right',ratio_white)
+                    cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+                    
+                    gaze_output = 1 # right
+                    time.sleep(1)
+                #elif 0.83 <= ratio_white < 1.2 :
+                    
+                    #print('centre',ratio_white)
+                   # cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+                elif ratio_white > 1.4:
+                    #print('left',ratio_white)
+                    cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
+                    gaze_output = -1 # left
+                    time.sleep(1)
+                else :
+                    gaze_output = 0
+                return gaze_output
+            
+            
+            # calling the direction gaze every 3 secs after
+
+            
+            #gaze_output = direction_reg
+            return([image , thresh, blink, direction_reg(image = image, ratio_white = ratio_white)])
     else:
         return([image])
 
 
+########################### list of actions ###########################
+
+L_actions = ['hello',
+             'hi! I am Soham',
+             'ok',
+             'thank you',
+             'What is your name?',
+             'How are you?',
+             'yes',
+             'no',
+             'Please',
+             'Please help',
+             'I am hungry',
+             'Need to go to the washroom',
+             'Need a glass of water']
 
 ########################### test ###########################
 
@@ -162,20 +216,53 @@ success = True
 fps = int(cap.get(cv2.CAP_PROP_FPS))
 out = cv2.VideoWriter('RESULTS.avi', fourcc, 30, (750, 421)) 
 
+
+L_blink_count=[]
+action_reg = L_actions[0] # outside while loop of video
+
 while cap.isOpened():
     _, img = cap.read()
-
+    eye_blink_count = 0
     output = main_detection(image=img)
-    if len(output) == 2:
-        cv2.imshow('main', output[0])
+    if len(output) > 1:
         cv2.imshow('cropped', output[1])
+        eye_blink_count = output[2] + eye_blink_count
+        
+        print(eye_blink_count)  
+        input = output[3]
+        if input == 1:
+            #i = input
+            action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
+            print(action_reg )
+        elif input == -1:
+            action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
+            print(action_reg )
+        else:
+            print('no action registered')
+
+        
+        
+        
+        if eye_blink_count == 1:
+            L_blink_count.append(eye_blink_count)
+            if len(L_blink_count)>= 7:
+                print('input registered')
+                print('selection =', action_reg)
+                cv2.putText(output[0], 'input registered', (100,200), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+                
+            
+        
+        else:
+            L_blink_count=[]
+        cv2.imshow('main', output[0])
+            
         
     else:
         cv2.imshow('main', output[0])
     
     #out.write(output[0])
         
-    #cv2.imshow('main',output_main)
+    #cv2.imshow('main',img)
     #cv2.imshow('main',output_eye)
     if cv2.waitKey(1) & 0xFF == ord('b'):
         break
