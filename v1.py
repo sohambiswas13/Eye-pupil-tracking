@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Wed Jan 20 18:07:43 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jan 20 11:23:51 2021
 
 @author: Soham
@@ -166,7 +173,7 @@ def main_detection(image):
                     cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     
                     gaze_output = 1 # right
-                    time.sleep(1)
+                    time.sleep(2)
                 #elif 0.83 <= ratio_white < 1.2 :
                     
                     #print('centre',ratio_white)
@@ -175,7 +182,7 @@ def main_detection(image):
                     #print('left',ratio_white)
                     cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     gaze_output = -1 # left
-                    time.sleep(1)
+                    time.sleep(2)
                 else :
                     gaze_output = 0
                 return gaze_output
@@ -192,19 +199,33 @@ def main_detection(image):
 
 ########################### list of actions ###########################
 
-L_actions = ['hello',
+L_actions = ['text0',
+             'text1',
+             'text2',
+             'text3',
+             'text4',
+             'text5',
+             'text6',
+             'text7',
+             'text8',
+             'text9',
+             'text10',
+             'text11']
+
+
+L_actions_text = ['hello',
              'hi! I am Soham',
              'ok',
              'thank you',
-             'What is your name?',
-             'How are you?',
+             'What is your name',
+             'How are you',
              'yes',
              'no',
              'Please',
              'Please help',
-             'I am hungry',
              'Need to go to the washroom',
              'Need a glass of water']
+
 
 ########################### test ###########################
 
@@ -234,9 +255,12 @@ while cap.isOpened():
             #i = input
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
+            cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
         elif input == -1:
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
+            cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+
         else:
             print('no action registered')
 
@@ -248,6 +272,11 @@ while cap.isOpened():
             if len(L_blink_count)>= 7:
                 print('input registered')
                 print('selection =', action_reg)
+                
+                ################
+                text_2_speech_output(textfile=action_reg)
+                ################
+
                 cv2.putText(output[0], 'input registered', (100,200), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
                 
             
