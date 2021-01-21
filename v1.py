@@ -1,5 +1,12 @@
 # -*- coding: utf-8 -*-
 """
+Created on Thu Jan 21 14:18:10 2021
+
+@author: Soham
+"""
+
+# -*- coding: utf-8 -*-
+"""
 Created on Wed Jan 20 18:07:43 2021
 
 @author: Soham
@@ -42,7 +49,6 @@ Created on Sat Jan 16 11:08:14 2021
 
 import cv2
 import dlib
-import face_recognition
 import numpy as np
 import time
 from gtts import gTTS 
@@ -59,6 +65,12 @@ detector_face = dlib.get_frontal_face_detector()
 predictor_landmark = dlib.shape_predictor('shape_predictor_68_face_landmarks.dat')
     
 
+########################### function for text to speech from stored voices ###########################
+
+def text_2_speech_output(textfile):
+    # Playing the converted file 
+    os.system(textfile+'.mp3') 
+    
 ########################### defining function for eye blink ###########################
 
 # function to detect blink, take 3 points,
@@ -218,10 +230,10 @@ L_actions = ['text0',
 
 L_actions_text = ['hello',
              'hi! I am Soham',
-             'ok',
-             'thank you',
              'What is your name',
              'How are you',
+             'ok',
+             'thank you',             
              'yes',
              'no',
              'Please',
@@ -280,7 +292,9 @@ while cap.isOpened():
         cv2.moveWindow('Eye Track', width//2 - 60, img.shape[0]+30)
         cv2.imshow('Eye Track', output[1])
         eye_blink_count = output[2] + eye_blink_count
-        
+        ########################### loading actions table ###########################
+
+        actions_table = cv2.imread('actions_table.png')
         print(eye_blink_count)  
         input = output[3]
         if input == 1:
@@ -288,13 +302,20 @@ while cap.isOpened():
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
             cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30 - 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))
+            cv2.imshow('actions_table', actions_table)
+
         elif input == -1:
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
             cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))
+            cv2.imshow('actions_table', actions_table)
 
         else:
             print('no action registered')
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))            
+            cv2.imshow('actions_table', actions_table)
 
         
         
