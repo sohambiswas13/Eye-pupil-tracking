@@ -45,6 +45,9 @@ import dlib
 import face_recognition
 import numpy as np
 import time
+from gtts import gTTS 
+import os  
+from win32api import GetSystemMetrics # to get screen dimensions for setting output window coord
 
 # initiating the face recognition library in dlib
 detector_face = dlib.get_frontal_face_detector()
@@ -165,10 +168,10 @@ def main_detection(image):
            
             # ratio of white pixel count left vs right
             ratio_white =  left_thresh_black/right_thresh_black
-            
+            print(ratio_white)
             def direction_reg(image, ratio_white):
                 
-                if ratio_white < 1:
+                if ratio_white < 0.85:
                     #print('right',ratio_white)
                     cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     
@@ -178,7 +181,7 @@ def main_detection(image):
                     
                     #print('centre',ratio_white)
                    # cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-                elif ratio_white > 1.4:
+                elif ratio_white > 1.25:
                     #print('left',ratio_white)
                     cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     gaze_output = -1 # left
@@ -227,16 +230,18 @@ L_actions_text = ['hello',
              'Need a glass of water']
 
 
+
 ########################### test ###########################
 
 
+
+
 cap =   cv2.VideoCapture(0)#, cv2.CAP_DSHOW)
+_, img = cap.read()
 
-fourcc = cv2.VideoWriter_fourcc(*'XVID') 
-success = True
-fps = int(cap.get(cv2.CAP_PROP_FPS))
-out = cv2.VideoWriter('RESULTS.avi', fourcc, 30, (750, 421)) 
 
+
+########################### running algo ###########################
 
 L_blink_count=[]
 action_reg = L_actions[0] # outside while loop of video
@@ -245,8 +250,35 @@ while cap.isOpened():
     _, img = cap.read()
     eye_blink_count = 0
     output = main_detection(image=img)
+    ########################### left and right gaze targets ###########################
+    width = GetSystemMetrics(0)
+    x = width//2 - img.shape[1]//2
+    y = 0
+    #x = width of target window
+    #y = height of target window
+    left_target = np.zeros([ img.shape[1]//2, x, 3])
+    left_target.fill(255)
+    cv2.putText(left_target, 'Left target', (100,200), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+    cv2.namedWindow('left target')
+    cv2.moveWindow('left target', 0, 0)
+    cv2.imshow('left target', left_target)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+    
+    right_target =np.zeros([ img.shape[1]//2, x, 3])
+    right_target.fill(255)
+    cv2.putText(right_target, 'Right target', (100,200), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
+    cv2.namedWindow('right target')
+    cv2.moveWindow('right target', width - img.shape[1]//2 ,0)
+    cv2.imshow('right target', right_target)
+    #cv2.waitKey(0)
+    #cv2.destroyAllWindows()
+    ########################### closing of setting left-right target ###########################
+    
     if len(output) > 1:
-        cv2.imshow('cropped', output[1])
+        cv2.namedWindow('Eye Track')
+        cv2.moveWindow('Eye Track', width//2 - 60, img.shape[0]+30)
+        cv2.imshow('Eye Track', output[1])
         eye_blink_count = output[2] + eye_blink_count
         
         print(eye_blink_count)  
@@ -283,20 +315,26 @@ while cap.isOpened():
         
         else:
             L_blink_count=[]
+            
+        cv2.namedWindow('main')
+        cv2.moveWindow('main', x, y)
         cv2.imshow('main', output[0])
             
         
     else:
+        cv2.namedWindow('main')        
+        cv2.moveWindow('main', x, y)
         cv2.imshow('main', output[0])
     
     #out.write(output[0])
         
     #cv2.imshow('main',img)
-    #cv2.imshow('main',output_eye)
+    #cv2.imshow('main',output_eye)    
+
+    
     if cv2.waitKey(1) & 0xFF == ord('b'):
         break
 
 cap.release()
-#out.release()
 cv2.destroyAllWindows() 
 
