@@ -27,10 +27,10 @@ def text_2_speech_input(text, index):
 
 L_actions_text = ['hello',
              'hi! I am Soham',
-             'ok',
-             'thank you',
              'What is your name',
              'How are you',
+             'ok',
+             'thank you',             
              'yes',
              'no',
              'Please',
