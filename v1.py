@@ -203,19 +203,12 @@ L_actions_text = ['hello',
 
 ########################### test ###########################
 
-
-
-
-cap =   cv2.VideoCapture(0)#, cv2.CAP_DSHOW)
-_, img = cap.read()
-
-
-
 ########################### running algo ###########################
 
 L_blink_count=[]
 action_reg = L_actions[0] # outside while loop of video
 
+cap =   cv2.VideoCapture(0)
 while cap.isOpened():
     _, img = cap.read()
     eye_blink_count = 0
