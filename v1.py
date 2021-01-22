@@ -31,8 +31,8 @@ def text_2_speech_output(textfile):
     
 ########################### defining function for eye blink ###########################
 
-# function to detect blink, take 3 points,
-# looks if the length of the line from these
+# function to detect blink, take 6 points,
+# looks if the length of the EAR from these
 # points drops down below certain threshold
 # return blink, else open
 def euc_dist(v1,v2):
