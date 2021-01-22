@@ -1,47 +1,5 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jan 21 14:18:10 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 20 18:07:43 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jan 20 11:23:51 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Mon Jan 18 11:36:58 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jan 17 23:41:17 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
-Created on Sun Jan 17 21:17:56 2021
-
-@author: Soham
-"""
-
-# -*- coding: utf-8 -*-
-"""
 Created on Sat Jan 16 11:08:14 2021
 
 @author: Soham
@@ -188,7 +146,7 @@ def main_detection(image):
                     cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     
                     gaze_output = 1 # right
-                    time.sleep(2)
+                    time.sleep(1)
                 #elif 0.83 <= ratio_white < 1.2 :
                     
                     #print('centre',ratio_white)
@@ -197,7 +155,7 @@ def main_detection(image):
                     #print('left',ratio_white)
                     cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     gaze_output = -1 # left
-                    time.sleep(2)
+                    time.sleep(1)
                 else :
                     gaze_output = 0
                 return gaze_output
@@ -302,19 +260,19 @@ while cap.isOpened():
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
             cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
-            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30 - 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30 - 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (255,0, 0))
             cv2.imshow('actions_table', actions_table)
 
         elif input == -1:
             action_reg = L_actions[(L_actions.index(action_reg)+ input)%len(L_actions)]
             print(action_reg )
             cv2.putText(output[0], L_actions_text[L_actions.index(action_reg)], (240,300), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0,0,255),2)
-            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (255,0, 0))
             cv2.imshow('actions_table', actions_table)
 
         else:
             print('no action registered')
-            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (0,0,255))            
+            cv2.rectangle(actions_table, (10,(L_actions.index(action_reg)+1)*30- 20), ((285,(L_actions.index(action_reg)+1)*30 + 10)), (255,0, 0))            
             cv2.imshow('actions_table', actions_table)
 
         
