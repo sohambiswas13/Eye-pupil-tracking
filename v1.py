@@ -161,7 +161,7 @@ def main_detection(image):
                 return gaze_output
             
             
-            # calling the direction gaze every 3 secs after
+            # calling the direction gaze every 1 sec after
 
             
             #gaze_output = direction_reg
