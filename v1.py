@@ -31,8 +31,8 @@ def text_2_speech_output(textfile):
     
 ########################### defining function for eye blink ###########################
 
-# function to detect blink, take 6 points,
-# looks if the length of the EAR from these
+# function to detect blink, take 3 points,
+# looks if the length of the line from these
 # points drops down below certain threshold
 # return blink, else open
 def euc_dist(v1,v2):
@@ -137,11 +137,13 @@ def main_detection(image):
             right_thresh_black = height*width -  cv2.countNonZero(right_thresh)
            
             # ratio of white pixel count left vs right
-            ratio_white =  left_thresh_black/right_thresh_black
-            print(ratio_white)
+            ratio_white_left =  left_thresh_black/right_thresh_black
+            ratio_white_right = right_thresh_black/left_thresh_black
+            print('ratio_white',ratio_white_left)
+            print('ratio_white_right',ratio_white_right)
             def direction_reg(image, ratio_white):
                 
-                if ratio_white < 0.85:
+                if ratio_white_left < 0.85 or ratio_white_right > 1.4 :
                     #print('right',ratio_white)
                     cv2.putText(image, 'right', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     
@@ -151,7 +153,7 @@ def main_detection(image):
                     
                     #print('centre',ratio_white)
                    # cv2.putText(image, 'centre', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
-                elif ratio_white > 1.25:
+                elif ratio_white_left > 1.25 or ratio_white_right < 0.7:
                     #print('left',ratio_white)
                     cv2.putText(image, 'left', (100,100), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (255,255,255),1)
                     gaze_output = -1 # left
@@ -161,11 +163,11 @@ def main_detection(image):
                 return gaze_output
             
             
-            # calling the direction gaze every 1 sec after
+            # calling the direction gaze every 3 secs after
 
             
             #gaze_output = direction_reg
-            return([image , thresh, blink, direction_reg(image = image, ratio_white = ratio_white)])
+            return([image , thresh, blink, direction_reg(image = image, ratio_white = ratio_white_left)])
     else:
         return([image])
 
@@ -203,12 +205,19 @@ L_actions_text = ['hello',
 
 ########################### test ###########################
 
+
+
+
+cap =   cv2.VideoCapture(0)#, cv2.CAP_DSHOW)
+_, img = cap.read()
+
+
+
 ########################### running algo ###########################
 
 L_blink_count=[]
 action_reg = L_actions[0] # outside while loop of video
 
-cap =   cv2.VideoCapture(0)
 while cap.isOpened():
     _, img = cap.read()
     eye_blink_count = 0
